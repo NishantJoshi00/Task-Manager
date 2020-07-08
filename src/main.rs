@@ -5,6 +5,9 @@ use std::io::{Write};
 use serde::{Serialize, Deserialize};
 use serde_json;
 
+// This is a internal model for handling the process and the tasks
+mod handler;
+
 #[derive(Serialize, Deserialize)]
 enum Outcome {
     /*
@@ -95,7 +98,8 @@ fn main() {
 
     // Setting the directory as `pwd`
     env::set_current_dir(&workdir).unwrap();
-    let mut build: Instance;
+    
+    let build: Instance;
 
     // Checking if the configuration file for a user already exists
     if !(Path::new(&format!("{}.json", env::var("USER").unwrap())).exists()) {
