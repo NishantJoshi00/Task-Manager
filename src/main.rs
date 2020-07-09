@@ -1,80 +1,12 @@
 use clap::{App, Arg};
-use std::{env, fs, fmt};
+use std::{env, fs};
 use std::path::Path;
 use std::io::{Write};
-use serde::{Serialize, Deserialize};
 use serde_json;
 
 // This is a internal model for handling the process and the tasks
 mod handler;
-
-#[derive(Serialize, Deserialize)]
-enum Outcome {
-    /*
-    Structure based enum for outcome
-    This is for the condition fulfillment based on one of two types
-    - The stdout that is expected
-    - The return status code of the command that is to be executed
-    */
-    Output(String),
-    StatusCode(u8)
-}
-
-#[derive(Serialize, Deserialize)]
-struct Condition {
-    /*
-    A structure for holding the condition clause for the Task
-    It holds the command that is to be executed in String format
-    As well as the expected outcome in hit
-    */
-    command: String,
-    hit: Outcome
-}
-
-#[derive(Serialize, Deserialize)]
-struct Task {
-    /*
-    This structure holds details for a task that is to be executed
-    - condition: It holds all the conditions that are to be met simultaneously
-        In form of a resizible vector of struct Condition
-    - outcome: This holds all the commands that are to be executed when the condition is met
-    */
-    condition: Vec<Condition>,
-    outcome: Vec<String>
-}
-
-#[derive(Serialize, Deserialize)]
-struct Instance {
-    /*
-    Structure holding the detail of the configuration for a specific user
-    - It has the hostname of the user
-    - The state tasker is in
-        This deternimes if it is looking for any tasks
-    - The List of all the tasks assigned to it.
-    */
-    hostname: String,
-    asleep: bool,
-    tasks: Vec<Task>,
-}
-
-impl fmt::Display for Instance {
-    // This trait requires `fmt` with this exact signature.
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        // Write strictly the first element into the supplied output
-        // stream: `f`. Returns `fmt::Result` which indicates whether the
-        // operation succeeded or failed. Note that `write!` uses syntax which
-        // is very similar to `println!`.
-        write!(f, "{}", serde_json::ser::to_string_pretty(&self).unwrap())
-    }
-}
-
-fn refresh_the_build(p: &Path) -> Instance {
-    // Function for refreshing the build for the JSON config file
-    // The file that is opened as read-only
-    let file = fs::File::open(&p).expect("Unable to write");
-    // Returning the parsed JSON for the file as Instance
-    serde_json::de::from_reader(file).unwrap()
-}
+use handler::{Instance, refresh_the_build, split_string_for_command};
 
 fn main() {
 
@@ -137,6 +69,8 @@ fn main() {
     }
     println!("{}", &build); // DEBUG: Analysing the build that is existed so far
 
+    let e = "This is string splitting!";
+    println!("{:?}", split_string_for_command(e.to_owned()));
 
     // GOAL: To create a new process to handle the tasks that are present in the build <- variable
     // GOAL: To create a function for signal handling
