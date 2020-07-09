@@ -11,7 +11,7 @@ pub enum Outcome {
     - The return status code of the command that is to be executed
     */
     Output(String),
-    StatusCode(u8)
+    StatusCode(i32)
 }
 
 #[derive(Serialize, Deserialize)]
@@ -21,7 +21,7 @@ pub struct Condition {
     It holds the command that is to be executed in String format
     As well as the expected outcome in hit
     */
-    command: String,
+    pub command: String,
 	pub hit: Outcome
 }
 
@@ -33,8 +33,8 @@ pub struct Task {
         In form of a resizible vector of struct Condition
     - outcome: This holds all the commands that are to be executed when the condition is met
     */
-    condition: Vec<Condition>,
-    outcome: Vec<String>
+    pub condition: Vec<Condition>,
+    pub outcome: Vec<String>
 }
 
 #[derive(Serialize, Deserialize)]

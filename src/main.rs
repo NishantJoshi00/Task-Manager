@@ -2,11 +2,10 @@ use clap::{App, Arg};
 use std::{env, fs};
 use std::path::Path;
 use std::io::{Write};
-use serde_json;
 
 // This is a internal model for handling the process and the tasks
 mod handler;
-use handler::{Instance, refresh_the_build, split_string_for_command};
+use handler::{Instance, refresh_the_build};
 
 fn main() {
 
@@ -68,10 +67,7 @@ fn main() {
         build = refresh_the_build(Path::new(&format!("{}.json", env::var("USER").unwrap())))
     }
     println!("{}", &build); // DEBUG: Analysing the build that is existed so far
-
-    let e = "This is string splitting!";
-    println!("{:?}", split_string_for_command(e.to_owned()));
-
+    
     // GOAL: To create a new process to handle the tasks that are present in the build <- variable
     // GOAL: To create a function for signal handling
     // GOAL: To create a function to store the updated config file in the config file
