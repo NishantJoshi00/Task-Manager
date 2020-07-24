@@ -137,7 +137,6 @@ pub fn resolve_task_ser(t: &Task) -> bool {
 	return false;
 }
 
-
 #[allow(dead_code)]
 pub fn resolve_task_par(t: &Task) -> bool {
 	let dec = AtomicBool::new(true);
