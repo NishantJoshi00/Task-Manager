@@ -2,6 +2,9 @@ use std::{path::Path, fs};
 use std::process::{Command, Stdio};
 use super::datatypes::{Instance, Condition, Outcome, Task};
 
+// For parallel
+use std::sync::{Arc, Mutex, atomic::{AtomicBool, Ordering}};
+
 pub fn refresh_the_build(p: &Path) -> Instance {
     // Function for refreshing the build for the JSON config file
     // The file that is opened as read-only
@@ -98,9 +101,9 @@ pub fn resolve_condition(c: &Condition) -> bool {
 }
 
 
-
+// Serial Task Resolver
 #[allow(dead_code)]
-pub fn resolve_task(t: &Task) -> bool {
+pub fn resolve_task_ser(t: &Task) -> bool {
 	/*
 	This function borrows a Task and sees if all the condition that are present in the clause
 		Are true or not
@@ -132,4 +135,28 @@ pub fn resolve_task(t: &Task) -> bool {
 	}
 
 	return false;
+}
+
+
+#[allow(dead_code)]
+pub fn resolve_task_par(t: &Task) -> bool {
+	let dec = AtomicBool::new(true);
+	let safe_dec = Arc::new(dec);
+	let len = t.condition.len();
+	let mut handles = vec![];
+	for i in 0..len {
+		let condition = t.condition[i].clone();
+		let safe_dec = Arc::clone(&safe_dec);
+		handles.push(std::thread::spawn(move || {
+			if (*safe_dec).load(Ordering::Relaxed) { // Speed Improvement # MAYBE
+				if resolve_condition(&condition) == false {
+					(*safe_dec).store(false, Ordering::Relaxed);
+				}
+			}
+		}));
+	}
+	for i in handles {
+		i.join().unwrap();
+	}
+	Arc::try_unwrap(safe_dec).unwrap().into_inner()
 }

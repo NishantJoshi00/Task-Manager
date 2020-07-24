@@ -66,7 +66,7 @@ fn main() {
         // Getting the build for the already existant config file
         build = refresh_the_build(Path::new(&format!("{}.json", env::var("USER").unwrap())))
     }
-    println!("{}", &build); // DEBUG: Analysing the build that is existed so far
+    println!("{}", build); // DEBUG: Analysing the build that is existed so far
     // GOAL: To create a new process to handle the tasks that are present in the build <- variable
     // GOAL: To create a function for signal handling
     // GOAL: To create a function to store the updated config file in the config file
