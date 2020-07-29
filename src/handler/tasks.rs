@@ -3,14 +3,23 @@ use std::process::{Command, Stdio};
 use super::datatypes::{Instance, Condition, Outcome, Task};
 
 // For parallel
-use std::sync::{Arc, Mutex, atomic::{AtomicBool, Ordering}};
+use std::sync::{Arc, atomic::{AtomicBool, Ordering}};
 
 pub fn refresh_the_build(p: &Path) -> Instance {
     // Function for refreshing the build for the JSON config file
     // The file that is opened as read-only
-    let file = fs::File::open(&p).expect("Unable to write");
+    let file = fs::File::open(&p).expect("Unable to read..");
     // Returning the parsed JSON for the file as Instance
     serde_json::de::from_reader(file).unwrap()
+}
+
+pub fn update_disk_build(i: &Instance, p: &Path) {
+
+	// Opening the configuration file for the user mentioned above
+	let file = fs::File::create(&p).expect("unable to write..");
+
+	// Writing the data to the file in JSON format (pretty printed)
+	serde_json::ser::to_writer_pretty(file, &i).expect("Still not able to write..")
 }
 
 
@@ -138,7 +147,7 @@ pub fn resolve_task_ser(t: &Task) -> bool {
 }
 
 #[allow(dead_code)]
-pub fn resolve_task_par(t: &Task) -> bool {
+pub fn resolve_task(t: &Task) -> bool { // Parallel
 	let dec = AtomicBool::new(true);
 	let safe_dec = Arc::new(dec);
 	let len = t.condition.len();

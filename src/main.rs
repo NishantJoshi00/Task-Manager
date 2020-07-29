@@ -5,7 +5,7 @@ use std::io::{Write};
 
 // This is a internal model for handling the process and the tasks
 mod handler;
-use handler::{Instance, refresh_the_build};
+use handler::{Instance, refresh_the_build, update_disk_build};
 
 fn main() {
 
@@ -55,11 +55,12 @@ fn main() {
             tasks: Vec::new()
         };
         
-        // Opening the configuration file for the user mentioned above
-        let file = fs::File::create(Path::new(&format!("{}.json", env::var("USER").unwrap()))).expect("Unable to write");
+        // // Opening the configuration file for the user mentioned above
+        // let file = fs::File::create(Path::new(&format!("{}.json", env::var("USER").unwrap()))).expect("Unable to write");
 
-        // Writing the data to the file in JSON format (pretty printed)
-        serde_json::ser::to_writer_pretty(file, &build).expect("Still not able to write");
+        // // Writing the data to the file in JSON format (pretty printed)
+        // serde_json::ser::to_writer_pretty(file, &build).expect("Still not able to write");
+        update_disk_build(&build, Path::new(&format!("{}.json", env::var("USER").unwrap())));
 
     } else {
         
@@ -69,5 +70,5 @@ fn main() {
     println!("{}", build); // DEBUG: Analysing the build that is existed so far
     // GOAL: To create a new process to handle the tasks that are present in the build <- variable
     // GOAL: To create a function for signal handling
-    // GOAL: To create a function to store the updated config file in the config file
+    
 }
