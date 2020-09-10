@@ -168,3 +168,11 @@ pub fn resolve_task(t: &Task) -> bool { // Parallel
 	}
 	Arc::try_unwrap(safe_dec).unwrap().into_inner()
 }
+
+pub fn execute_task(t: &Task) {
+	let len = t.outcome.len();
+	for i in 0..len {
+		let cmd = split_string_for_command(&t.outcome[0]);
+		Command::new(cmd.0).args(cmd.1).status().expect("Error while executing the command!");
+	}
+}

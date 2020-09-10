@@ -5,7 +5,8 @@ use std::io::{Write};
 
 // This is a internal model for handling the process and the tasks
 mod handler;
-use handler::{Instance, refresh_the_build, update_disk_build};
+use handler::{Instance, refresh_the_build, update_disk_build, resolve_task, execute_task};
+mod manager;
 
 fn main() {
 
@@ -30,7 +31,7 @@ fn main() {
     // Setting the directory as `pwd`
     env::set_current_dir(&workdir).unwrap();
     
-    let build: Instance;
+    let mut build: Instance;
 
     // Checking if the configuration file for a user already exists
     if !(Path::new(&format!("{}.json", env::var("USER").unwrap())).exists()) {
@@ -65,10 +66,30 @@ fn main() {
     } else {
         
         // Getting the build for the already existant config file
-        build = refresh_the_build(Path::new(&format!("{}.json", env::var("USER").unwrap())))
+        build = refresh_the_build(Path::new(&format!("{}.json", env::var("USER").unwrap())));
     }
-    println!("{}", build); // DEBUG: Analysing the build that is existed so far
-    // GOAL: To create a new process to handle the tasks that are present in the build <- variable
-    // GOAL: To create a function for signal handling
-    
+    println!("{}", &build); // DEBUG: Analysing the build that is existed so far
+    // GOAL: To create a function for signal handling : DONE !
+    let ctrl_int = manager::signal::get_signal_abool_variable(manager::signal::signals::SIGINT).unwrap();
+    let ctrl_up = manager::signal::get_signal_abool_variable(manager::signal::signals::SIGHUP).unwrap();
+    loop {
+        let mut i = 0;
+        if ctrl_up.load(std::sync::atomic::Ordering::Relaxed) {
+            build = refresh_the_build(Path::new(&format!("{}.json", env::var("USER").unwrap())));
+        }
+        while i < build.tasks.len() {
+            if ctrl_int.load(std::sync::atomic::Ordering::Relaxed) {
+                
+                return;
+            }
+            if resolve_task(&build.tasks[i]) {
+                execute_task(&build.tasks[i]);
+                build.tasks.remove(i);
+            } else {
+                i += 1;
+            }
+        }
+        update_disk_build(&build, Path::new(&format!("{}.json", env::var("USER").unwrap())));
+        
+    }
 }

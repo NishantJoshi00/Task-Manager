@@ -8,6 +8,6 @@ pub mod signals {
 
 pub fn get_signal_abool_variable(sig: i32) -> Result<Arc<AtomicBool>, std::io::Error> {
 	let int = Arc::new(AtomicBool::new(false));
-	signal_hook::flag::register(sig, int)?;
-	int
+	signal_hook::flag::register(sig, Arc::clone(&int))?;
+	Ok(int)
 }

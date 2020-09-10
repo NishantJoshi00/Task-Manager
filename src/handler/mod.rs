@@ -1,6 +1,6 @@
 // From the tasks file
 mod tasks;
-pub use tasks::{refresh_the_build, resolve_task, update_disk_build};
+pub use tasks::{refresh_the_build, resolve_task, update_disk_build, execute_task};
 
 
 // From the datatypes file
